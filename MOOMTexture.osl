@@ -1,0 +1,48 @@
+shader
+MOOMTexture(
+	// The path to the texture.
+	string mapPath = ""
+	[[
+		string widget = "filename",
+		string label = "Image Path"
+	]],
+	
+	// The color of the shader should the image not be loaded properly.
+	color defaultColor = color(1,0,1),
+	
+	// Corrects the color by applying a gamma value to it.
+	int linearize = 1
+	[[
+		string widget = "boolean",
+		string label = "Linearize"
+	]],
+	
+	// The value applied to each color during the linearization process.
+	float gamma = 2.2,
+	
+	// Optional value to blur the texture maps.
+	float blur = 0,
+	
+	// The output color.
+	output color resultRGB = 0
+	)
+{
+
+	// The map attribute is stored and used as pathValue. It is then used to load the texture.
+	string pathValue;
+	if(getattribute("map", pathValue)) {
+		resultRGB = texture(pathValue, u, flipV ? (1 - v) : v, "blur", blur);
+		
+		// If the texture is to be linearized, the gamma is applied to it.
+		if(linearize) {
+			resultRGB[0] = pow(resultRGB[0], gamma);
+			resultRGB[1] = pow(resultRGB[1], gamma);
+			resultRGB[2] = pow(resultRGB[2], gamma);
+		}
+		
+	} else {
+	
+		// IF the texture failed to load, a default color is applied.
+		resultRGB = defaultColor;
+	}
+}
